@@ -52,7 +52,7 @@ export interface ApiResponse<T> {
 }
 
 // ==========================================
-// 4. UTILITY TYPES (The "Shape Shifters")
+// UTILITY TYPES
 // ==========================================
 export type EngineerUpdate = Partial<Engineer>;
 
