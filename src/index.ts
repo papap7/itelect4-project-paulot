@@ -28,8 +28,8 @@ const myEngineer: Engineer = {
 
 const myWorkspace: ProjectWorkspace = {
   id: 101,
-  title: "A.D.A.M. Command Center",
-  description: "Accident Detection Backend",
+  title: "CloudOps Portal",
+  description: "A portal for managing cloud resources and provisioning requests.",
   createdAt: new Date(),
 };
 
