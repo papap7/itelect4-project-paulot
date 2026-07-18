@@ -1,11 +1,14 @@
-import { 
+import type{ 
   Engineer, 
   ProjectWorkspace, 
   ProvisionRequest, 
-  EngineerRole, 
-  ProvisionStatus, 
   ApiResponse, 
   WorkspacePreview 
+} from "./types/index";
+
+import {
+  EngineerRole, 
+  ProvisionStatus, 
 } from "./types/index";
 
 // ==========================================
@@ -16,7 +19,7 @@ function getFirst<T>(items: T[]): T | undefined {
 }
 
 // ==========================================
-// CREATING OUR DUMMY DATA
+// CREATING DUMMY DATA
 // ==========================================
 const myEngineer: Engineer = {
   id: 1,
