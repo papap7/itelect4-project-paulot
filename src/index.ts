@@ -14,7 +14,7 @@ import {
 // ==========================================
 // GENERIC FUNCTION DEMONSTRATION
 // ==========================================
-function getFirst<T>(items: T[]): T | undefined {
+export function getFirst<T>(items: T[]): T | undefined {
   return items[0];
 }
 
