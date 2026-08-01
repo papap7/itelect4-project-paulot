@@ -1,56 +1,26 @@
-// src/App.tsx
-import EngineerCard from "./components/EngineerCard";
-import WorkspaceCard from "./components/WorkspaceCard";
-import RequestBadge from "./components/RequestBadge";
+import { useState, useEffect, useRef } from "react";
 
-// Import your custom interfaces
-import type { Engineer, ProjectWorkspace, ProvisionRequest } from "./types/index";
-// Import your Enums separately!
-import { EngineerRole, ProvisionStatus } from "./types/index";
+  const [searchTerm, setSearchTerm] = useState<string>("");
+  const searchInputRef = useRef<HTMLInputElement>(null);
 
-// 1. Create Mock Data
-const mockEngineer: Engineer = {
-  id: 1,
-  name: "Paulo Tenorio",
-  email: "paulo@example.com",
-  role: EngineerRole.DevOpsAdmin,
-  isActive: true,
-};
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
+    setSearchTerm(e.target.value);
+  };
 
-const mockWorkspace: ProjectWorkspace = {
-  id: 101,
-  title: "A.D.A.M. Command Center",
-  description: "Accident Detection Backend Infrastructure",
-  createdAt: new Date(),
-};
+  const filteredWorkspaces = workspaces.filter((w) =>
+    w.title.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
-const mockRequest: ProvisionRequest = {
-  id: 5001,
-  engineerId: mockEngineer.id,
-  workspaceId: mockWorkspace.id,
-  resourceType: "Node.js Server",
-  status: ProvisionStatus.PendingReview,
-  requestedAt: new Date(),
-};
-
-// 2. Render the Components
-function App() {
   return (
     <div style={{ padding: "20px", fontFamily: "sans-serif" }}>
       <h1>CloudOps Provisioning Portal</h1>
-      
-      <EngineerCard 
-        engineer={mockEngineer} 
-        onSelect={(eng) => alert(`Selected: ${eng.name}`)} 
+      <input 
+        ref={searchInputRef}
+        value={searchTerm}
+        onChange={handleSearchChange}
+        type="text"
+        placeholder="Search workspaces..."
+        style={{ padding: "8px", width: "100%", maxWidth: "400px", marginBottom: "20px" }}
       />
-      
-      <WorkspaceCard workspace={mockWorkspace} />
-      
-      <RequestBadge request={mockRequest}>
-        <p>⚠️ Awaiting Admin Approval</p>
-      </RequestBadge>
     </div>
   );
-}
-
-export default App;
