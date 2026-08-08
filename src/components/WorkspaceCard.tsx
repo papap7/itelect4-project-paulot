@@ -2,14 +2,26 @@ import type { ProjectWorkspace } from "../types/index";
 
 interface WorkspaceCardProps {
   workspace: ProjectWorkspace;
+  variant?: "default" | "compact"; // NEW: optional variant prop
 }
 
-function WorkspaceCard({ workspace }: WorkspaceCardProps) {
+function WorkspaceCard({ workspace, variant = "default" }: WorkspaceCardProps) {
+  const isCompact = variant === "compact";
+
   return (
-    <div className="card" style={{ border: "1px solid #007bff", padding: "1rem", margin: "1rem 0" }}>
-      <h3>{workspace.title}</h3>
-      <p>{workspace.description}</p>
-      <small>Created: {workspace.createdAt.toLocaleDateString()}</small>
+    <div className={`rounded-lg border border-blue-500 bg-white shadow-sm dark:bg-gray-800 dark:border-blue-700 ${isCompact ? "p-3" : "p-5"}`}>
+      <h3 className={`font-bold text-gray-900 dark:text-white ${isCompact ? "text-sm" : "text-lg"}`}>
+        {workspace.title}
+      </h3>
+      
+      {/* Hide description if compact */}
+      {!isCompact && (
+        <p className="text-gray-600 dark:text-gray-300 mt-1">{workspace.description}</p>
+      )}
+      
+      <small className="block mt-2 text-gray-500 dark:text-gray-400">
+        Created: {workspace.createdAt.toLocaleDateString()}
+      </small>
     </div>
   );
 }
