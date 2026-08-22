@@ -1,7 +1,6 @@
 import { NavLink, Outlet } from "react-router";
 import useUiStore from "../store/uiStore";
 import useAuthStore from "../store/authStore";
-import { Cloud, LayoutDashboard, FolderKanban, Activity, LogOut, LogIn, Moon, Sun } from "lucide-react";
 
 function Layout() {
   const isDarkMode = useUiStore((state) => state.isDarkMode);
@@ -9,102 +8,82 @@ function Layout() {
   const userName = useAuthStore((state) => state.userName);
   const logout = useAuthStore((state) => state.logout);
 
-  const base = "flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-medium transition-all duration-300";
-  const activeLink = `${base} bg-blue-600/10 text-blue-600 dark:bg-blue-500/20 dark:text-blue-400`;
-  const idleLink = `${base} text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800/50 dark:hover:text-slate-50`;
+  const baseLinkClass = "flex items-center rounded-lg px-4 py-3 font-medium transition-all duration-200";
+  const activeLink = `${baseLinkClass} bg-blue-600 text-white shadow-md`;
+  const idleLink = `${baseLinkClass} text-gray-600 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-white`;
 
   const linkClass = ({ isActive }: { isActive: boolean }): string =>
     isActive ? activeLink : idleLink;
 
   return (
     <div className={isDarkMode ? "dark" : ""}>
-      <div className="min-h-screen bg-slate-50 dark:bg-[#0B1120] font-sans transition-colors duration-300">
+      <div className="flex h-screen bg-gray-50 dark:bg-gray-900 font-sans transition-colors duration-200 text-gray-900 dark:text-gray-100">
         
-        {/* Glassmorphic Header */}
-        <header className="sticky top-0 z-50 border-b border-slate-200/80 bg-white/70 backdrop-blur-md dark:border-slate-800/80 dark:bg-[#0B1120]/70">
-          <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-            
-            <div className="flex items-center gap-8">
-              {/* Logo */}
-              <div className="flex items-center gap-2">
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 shadow-lg shadow-blue-500/20">
-                  <Cloud className="h-5 w-5 text-white" />
-                </div>
-                <span className="text-lg font-bold tracking-tight text-slate-900 dark:text-white">
-                  CloudOps
-                </span>
-              </div>
+        {/* Sidebar */}
+        <aside className="w-64 flex flex-col border-r border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900 shadow-sm hidden md:flex">
+          <div className="flex items-center justify-center h-20 border-b border-gray-200 dark:border-gray-800">
+            <span className="text-xl font-bold tracking-wider text-blue-600 dark:text-blue-400 uppercase">CloudOps</span>
+          </div>
+          <nav className="flex-1 space-y-2 p-4">
+            <NavLink to="/" end className={linkClass}>
+              <span className="mr-3 text-lg">📊</span> Dashboard
+            </NavLink>
+            <NavLink to="/workspaces" className={linkClass}>
+              <span className="mr-3 text-lg">🖥️</span> Workspaces
+            </NavLink>
+            <NavLink to="/requests" className={linkClass}>
+              <span className="mr-3 text-lg">📝</span> Requests
+            </NavLink>
+          </nav>
+        </aside>
 
-              {/* Navigation */}
-              <nav className="hidden md:flex items-center gap-1">
-                <NavLink to="/" end className={linkClass}>
-                  <LayoutDashboard className="h-4 w-4" />
-                  Dashboard
-                </NavLink>
-                <NavLink to="/workspaces" className={linkClass}>
-                  <FolderKanban className="h-4 w-4" />
-                  Workspaces
-                </NavLink>
-                <NavLink to="/requests" className={linkClass}>
-                  <Activity className="h-4 w-4" />
-                  Requests
-                </NavLink>
-              </nav>
+        {/* Main Content Area */}
+        <div className="flex-1 flex flex-col overflow-hidden">
+          {/* Top Header */}
+          <header className="flex h-20 items-center justify-between border-b border-gray-200 bg-white px-8 dark:border-gray-800 dark:bg-gray-900 shadow-sm z-10">
+            <div className="flex items-center md:hidden">
+              <span className="text-xl font-bold tracking-wider text-blue-600 dark:text-blue-400 uppercase">CloudOps</span>
             </div>
-
-            {/* Right Side Actions */}
-            <div className="flex items-center gap-3">
+            
+            <div className="ml-auto flex items-center space-x-6">
               <button
                 onClick={toggleDarkMode}
-                className="flex h-9 w-9 items-center justify-center rounded-full text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-50"
-                aria-label="Toggle dark mode"
+                className="rounded-full p-2 text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800 transition-colors"
+                title={isDarkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}
               >
-                {isDarkMode ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+                {isDarkMode ? "☀️" : "🌙"}
               </button>
 
-              <div className="h-5 w-px bg-slate-200 dark:bg-slate-800"></div>
+              <div className="h-8 w-px bg-gray-300 dark:bg-gray-700"></div>
 
               {userName === null ? (
-                <NavLink to="/login" className={`${base} bg-slate-900 text-white hover:bg-slate-800 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-100`}>
-                  <LogIn className="h-4 w-4" />
-                  Sign In
+                <NavLink to="/login" className="rounded-lg bg-blue-600 px-5 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 transition-colors">
+                  Login
                 </NavLink>
               ) : (
-                <div className="flex items-center gap-4">
-                  <div className="hidden sm:flex flex-col items-end">
-                    <span className="text-sm font-semibold text-slate-900 dark:text-white">{userName}</span>
-                    <span className="text-xs text-slate-500 dark:text-slate-400">Engineer</span>
+                <div className="flex items-center space-x-4">
+                  <div className="flex items-center space-x-2">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-100 text-blue-600 dark:bg-blue-900 dark:text-blue-300 font-bold">
+                      {userName.charAt(0).toUpperCase()}
+                    </div>
+                    <span className="text-sm font-medium">{userName}</span>
                   </div>
                   <button 
                     onClick={logout} 
-                    className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 text-slate-500 transition-all hover:bg-red-50 hover:text-red-600 hover:border-red-200 dark:border-slate-800 dark:text-slate-400 dark:hover:bg-red-500/10 dark:hover:text-red-400 dark:hover:border-red-500/20"
-                    title="Sign out"
+                    className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700 transition-colors"
                   >
-                    <LogOut className="h-4 w-4" />
+                    Logout
                   </button>
                 </div>
               )}
             </div>
+          </header>
 
-          </div>
-        </header>
-
-        {/* Mobile Navigation (Visible only on small screens) */}
-        <nav className="flex md:hidden items-center justify-around border-b border-slate-200 bg-white/50 px-2 py-2 backdrop-blur-md dark:border-slate-800 dark:bg-[#0B1120]/50">
-           <NavLink to="/" end className={linkClass}>
-             <LayoutDashboard className="h-4 w-4" />
-           </NavLink>
-           <NavLink to="/workspaces" className={linkClass}>
-             <FolderKanban className="h-4 w-4" />
-           </NavLink>
-           <NavLink to="/requests" className={linkClass}>
-             <Activity className="h-4 w-4" />
-           </NavLink>
-        </nav>
-
-        <main className="mx-auto max-w-7xl p-4 sm:p-6 lg:p-8">
-          <Outlet />
-        </main>
+          {/* Page Content */}
+          <main className="flex-1 overflow-y-auto p-8 relative">
+            <Outlet />
+          </main>
+        </div>
       </div>
     </div>
   );

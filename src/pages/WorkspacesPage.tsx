@@ -3,7 +3,6 @@ import { useQuery } from "@tanstack/react-query";
 import WorkspaceCard from "../components/WorkspaceCard";
 import type { ApiWorkspace } from "../types/index";
 import { fetchWorkspaces } from "../api/client";
-import { Server } from "lucide-react";
 
 function WorkspacesPage() {
   const { data: workspaces = [], isPending, isError, error } = useQuery<ApiWorkspace[]>({
@@ -14,36 +13,41 @@ function WorkspacesPage() {
   if (isPending) {
     return (
       <div className="flex h-64 items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-slate-200 border-t-blue-600 dark:border-slate-800 dark:border-t-blue-500"></div>
+        <div className="flex items-center space-x-3 text-gray-500">
+          <div className="h-6 w-6 animate-spin rounded-full border-b-2 border-t-2 border-blue-600"></div>
+          <span className="text-lg font-medium">Loading workspaces...</span>
+        </div>
       </div>
     );
   }
 
   if (isError) {
     return (
-      <div className="rounded-xl bg-red-50 p-6 text-red-700 dark:bg-red-500/10 dark:text-red-400">
-        {error.message}
+      <div className="rounded-xl bg-red-50 p-6 border border-red-100 text-red-700 dark:bg-red-900/20 dark:border-red-800/30">
+        <h3 className="font-semibold text-lg mb-2">Error Loading Workspaces</h3>
+        <p>{error.message}</p>
       </div>
     );
   }
 
   return (
-    <div className="animate-in fade-in duration-500 space-y-6">
-      
-      <div className="flex items-center gap-3 mb-8">
-        <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-50 text-blue-600 dark:bg-blue-500/10 dark:text-blue-400">
-          <Server className="h-6 w-6" />
-        </div>
+    <div className="max-w-7xl mx-auto space-y-6">
+      <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Environments</h1>
-          <p className="text-sm text-slate-500 dark:text-slate-400">Manage all active cloud infrastructure workspaces.</p>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Workspaces</h1>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Manage and monitor all active cloud environments</p>
         </div>
+        <button className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700">
+          + New Workspace
+        </button>
       </div>
 
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3">
+      <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {workspaces.map((w) => (
-          <Link key={w.id} to={`/workspaces/${w.id}`} className="block h-full">
-            <WorkspaceCard workspace={w} variant="default" />
+          <Link key={w.id} to={`/workspaces/${w.id}`} className="group outline-none ring-blue-500 focus:ring-2 rounded-lg">
+            <div className="transition-transform duration-200 group-hover:-translate-y-1">
+              <WorkspaceCard workspace={w} variant="default" />
+            </div>
           </Link>
         ))}
       </div>

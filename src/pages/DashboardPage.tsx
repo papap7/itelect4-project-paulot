@@ -3,29 +3,33 @@ import { useQuery } from "@tanstack/react-query";
 import EngineerCard from "../components/EngineerCard";
 import WorkspaceCard from "../components/WorkspaceCard";
 import RequestBadge from "../components/RequestBadge";
+import useToggle from "../hooks/useToggle";
 
 import type { Engineer, ApiWorkspace, ApiRequest } from "../types/index";
 import { mockEngineers } from "../data/mockData";
+import useUiStore from "../store/uiStore";
 import { fetchWorkspaces, fetchRequests } from "../api/client";
-import { Search, FolderKanban, Activity, Users } from "lucide-react";
-import { Link } from "react-router";
 
 function DashboardPage() {
   const [selectedEngineer, setSelectedEngineer] = useState<Engineer | null>(null);
-  const [searchTerm, setSearchTerm] = useState<string>("");
   
-  const { data: workspaces = [], isPending: isLoadingWorkspaces, isError: isErrorWorkspaces } = useQuery<ApiWorkspace[]>({
+  const { data: workspaces = [], isPending: workspacesPending, isError: workspacesError } = useQuery<ApiWorkspace[]>({
     queryKey: ["workspaces"],
     queryFn: fetchWorkspaces,
   });
 
-  const { data: requests = [] } = useQuery<ApiRequest[]>({
+  const { data: requests = [], isPending: requestsPending } = useQuery<ApiRequest[]>({
     queryKey: ["requests"],
     queryFn: fetchRequests,
   });
   
-  const pendingRequests = requests.filter(r => r.status.toLowerCase().includes("pending"));
-  const latestRequests = requests.slice(0, 3); // top 3
+  const latestRequest = requests.length > 0 ? requests[0] : null;
+  const pendingRequestsCount = requests.filter(r => r.status === "Pending Review").length;
+
+  const searchTerm = useUiStore((state) => state.searchTerm);
+  const setSearchTerm = useUiStore((state) => state.setSearchTerm);
+  
+  const [showRequest, toggleRequest] = useToggle(false);
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
     setSearchTerm(e.target.value);
@@ -33,143 +37,127 @@ function DashboardPage() {
 
   const filteredWorkspaces = workspaces.filter((w) =>
     w.title.toLowerCase().includes(searchTerm.toLowerCase())
-  ).slice(0, 6); // show only up to 6 on dashboard
-
-  if (isLoadingWorkspaces) {
-    return (
-      <div className="flex h-64 items-center justify-center">
-        <div className="flex flex-col items-center gap-4">
-          <div className="h-8 w-8 animate-spin rounded-full border-4 border-slate-200 border-t-blue-600 dark:border-slate-800 dark:border-t-blue-500"></div>
-          <p className="text-sm font-medium text-slate-500 dark:text-slate-400 animate-pulse">Syncing Command Center...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (isErrorWorkspaces) {
-    return (
-      <div className="rounded-xl bg-red-50 p-6 text-red-700 dark:bg-red-500/10 dark:text-red-400">
-        <h3 className="font-bold">Connection Failed</h3>
-        <p className="mt-1 text-sm">Could not reach the server (port 3001). Please ensure json-server is running.</p>
-      </div>
-    );
-  }
+  );
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-500">
-        
-        {/* --- Header & Top Metrics --- */}
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white mb-6">Overview</h1>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            <div className="flex items-center gap-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900/50">
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-50 text-blue-600 dark:bg-blue-500/10 dark:text-blue-400">
-                <FolderKanban className="h-6 w-6" />
-              </div>
-              <div>
-                <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Active Workspaces</p>
-                <p className="text-2xl font-bold text-slate-900 dark:text-white">{workspaces.length}</p>
-              </div>
-            </div>
-            
-            <div className="flex items-center gap-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900/50">
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-amber-50 text-amber-600 dark:bg-amber-500/10 dark:text-amber-400">
-                <Activity className="h-6 w-6" />
-              </div>
-              <div>
-                <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Pending Requests</p>
-                <p className="text-2xl font-bold text-slate-900 dark:text-white">{pendingRequests.length}</p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900/50">
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-purple-50 text-purple-600 dark:bg-purple-500/10 dark:text-purple-400">
-                <Users className="h-6 w-6" />
-              </div>
-              <div>
-                <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Total Engineers</p>
-                <p className="text-2xl font-bold text-slate-900 dark:text-white">{mockEngineers.length}</p>
-              </div>
-            </div>
-          </div>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Dashboard Overview</h1>
+          <p className="text-sm text-gray-500 dark:text-gray-400">Manage your infrastructure and team</p>
         </div>
+      </div>
 
-        {/* --- Two Column Layout --- */}
-        <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
-          
-          {/* Main Column: Workspaces */}
-          <div className="lg:col-span-2 space-y-6">
-            <div className="flex items-center justify-between">
-              <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Recent Workspaces</h2>
-              <div className="relative w-64">
-                <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-slate-400">
-                  <Search className="h-4 w-4" />
+      {/* Metrics Row */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-gray-900">
+          <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Total Workspaces</h3>
+          <p className="mt-2 text-3xl font-bold text-gray-900 dark:text-white">{workspacesPending ? "-" : workspaces.length}</p>
+        </div>
+        <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-gray-900">
+          <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Active Engineers</h3>
+          <p className="mt-2 text-3xl font-bold text-gray-900 dark:text-white">{mockEngineers.length}</p>
+        </div>
+        <div className="rounded-xl border border-blue-200 bg-blue-50 p-6 shadow-sm dark:border-blue-900/50 dark:bg-blue-900/20">
+          <h3 className="text-sm font-medium text-blue-600 dark:text-blue-400">Pending Requests</h3>
+          <p className="mt-2 text-3xl font-bold text-blue-700 dark:text-blue-300">{requestsPending ? "-" : pendingRequestsCount}</p>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+        
+        {/* Left Column: Workspaces */}
+        <div className="xl:col-span-2 space-y-6">
+          <div className="rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-800 dark:bg-gray-900 overflow-hidden">
+            <div className="border-b border-gray-200 bg-gray-50 px-6 py-4 dark:border-gray-800 dark:bg-gray-800/50 flex justify-between items-center">
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Active Workspaces</h2>
+              <input 
+                value={searchTerm}
+                onChange={handleSearchChange}
+                type="text"
+                placeholder="Filter workspaces..."
+                className="w-48 rounded-lg border border-gray-300 px-3 py-1.5 text-sm focus:border-blue-500 focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+              />
+            </div>
+            
+            <div className="p-6">
+              {workspacesPending ? (
+                <div className="animate-pulse flex space-x-4">
+                  <div className="flex-1 space-y-4 py-1">
+                    <div className="h-2 bg-gray-200 rounded"></div>
+                    <div className="space-y-3">
+                      <div className="grid grid-cols-3 gap-4">
+                        <div className="h-2 bg-gray-200 rounded col-span-2"></div>
+                        <div className="h-2 bg-gray-200 rounded col-span-1"></div>
+                      </div>
+                      <div className="h-2 bg-gray-200 rounded"></div>
+                    </div>
+                  </div>
                 </div>
-                <input 
-                  value={searchTerm}
-                  onChange={handleSearchChange}
-                  type="text"
-                  placeholder="Filter..."
-                  className="w-full rounded-lg border border-slate-200 bg-slate-50 py-1.5 pl-9 pr-3 text-sm text-slate-900 placeholder:text-slate-400 focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-slate-700 dark:bg-slate-900/50 dark:text-white dark:focus:bg-slate-800"
-                />
-              </div>
-            </div>
-
-            {filteredWorkspaces.length === 0 ? (
-              <div className="flex h-32 items-center justify-center rounded-2xl border border-dashed border-slate-300 dark:border-slate-700">
-                <p className="text-sm text-slate-500 dark:text-slate-400">No workspaces match your search.</p>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                {filteredWorkspaces.map(ws => (
-                  <Link key={ws.id} to={`/workspaces/${ws.id}`} className="block">
-                    <WorkspaceCard workspace={ws as any} variant="compact" />
-                  </Link>
-                ))}
-              </div>
-            )}
-            
-            <div className="pt-2">
-              <Link to="/workspaces" className="text-sm font-medium text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 flex items-center gap-1">
-                View all workspaces &rarr;
-              </Link>
-            </div>
-          </div>
-
-          {/* Sidebar Column: Engineers & Requests */}
-          <div className="space-y-8">
-            
-            <div>
-              <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">Latest Requests</h2>
-              {latestRequests.length === 0 ? (
-                <p className="text-sm text-slate-500 dark:text-slate-400">No requests yet.</p>
+              ) : workspacesError ? (
+                <p className="text-red-500">Failed to load workspaces.</p>
+              ) : filteredWorkspaces.length === 0 ? (
+                <p className="text-gray-500 dark:text-gray-400 text-center py-4">No workspaces found.</p>
               ) : (
-                <div className="flex flex-col gap-3">
-                  {latestRequests.map(req => (
-                    <RequestBadge key={req.id} request={req} />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {filteredWorkspaces.map(ws => (
+                    <WorkspaceCard key={ws.id} workspace={ws} variant="compact" />
                   ))}
                 </div>
               )}
             </div>
+          </div>
+        </div>
 
-            <div>
-              <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">Team Directory</h2>
-              <div className="flex flex-col gap-3">
-                {mockEngineers.map(eng => (
-                  <EngineerCard key={eng.id} engineer={eng} onSelect={setSelectedEngineer} />
-                ))}
-              </div>
+        {/* Right Column: Engineers & Requests */}
+        <div className="space-y-6">
+          
+          <div className="rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-800 dark:bg-gray-900 overflow-hidden">
+            <div className="border-b border-gray-200 bg-gray-50 px-6 py-4 dark:border-gray-800 dark:bg-gray-800/50">
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Engineering Team</h2>
+            </div>
+            <div className="p-6 space-y-4">
+              {mockEngineers.map(eng => (
+                <EngineerCard key={eng.id} engineer={eng} onSelect={setSelectedEngineer} />
+              ))}
+              
               {selectedEngineer && (
-                <div className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 p-3 dark:border-emerald-500/20 dark:bg-emerald-500/10">
-                  <p className="text-sm font-medium text-emerald-800 dark:text-emerald-400">
-                    Pinged: {selectedEngineer.name}
+                <div className="mt-4 rounded-lg bg-green-50 p-3 border border-green-200 dark:bg-green-900/20 dark:border-green-800/30">
+                  <p className="text-sm font-medium text-green-800 dark:text-green-400">
+                    Selected: {selectedEngineer.name}
                   </p>
                 </div>
               )}
             </div>
-
           </div>
+
+          <div className="rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-800 dark:bg-gray-900 overflow-hidden">
+            <div className="border-b border-gray-200 bg-gray-50 px-6 py-4 dark:border-gray-800 dark:bg-gray-800/50 flex justify-between items-center">
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Recent Request</h2>
+              <button 
+                onClick={toggleRequest} 
+                className="text-xs font-medium text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+              >
+                {showRequest ? "Hide" : "Show"}
+              </button>
+            </div>
+            
+            {showRequest && (
+              <div className="p-6">
+                {latestRequest ? (
+                  <RequestBadge request={latestRequest}>
+                    <p className="text-xs mt-1 text-gray-500">Requested: {new Date(latestRequest.requestedAt).toLocaleDateString()}</p>
+                  </RequestBadge>
+                ) : (
+                  <p className="text-sm text-gray-500 dark:text-gray-400">No recent requests.</p>
+                )}
+              </div>
+            )}
+          </div>
+
         </div>
+      </div>
     </div>
   );
 }
