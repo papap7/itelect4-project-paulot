@@ -1,7 +1,7 @@
-import type { ProjectWorkspace } from "../types/index";
+import type { ApiWorkspace } from "../types/index";
 
 interface WorkspaceCardProps {
-  workspace: ProjectWorkspace;
+  workspace: ApiWorkspace;
   variant?: "default" | "compact"; // NEW: optional variant prop
 }
 
@@ -20,7 +20,7 @@ function WorkspaceCard({ workspace, variant = "default" }: WorkspaceCardProps) {
       )}
       
       <small className="block mt-2 text-gray-500 dark:text-gray-400">
-        Created: {workspace.createdAt.toLocaleDateString()}
+        Created: {workspace.createdAt}
       </small>
     </div>
   );

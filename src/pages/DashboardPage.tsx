@@ -1,42 +1,42 @@
-import { useState, useEffect, useRef } from "react";
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import EngineerCard from "../components/EngineerCard";
 import WorkspaceCard from "../components/WorkspaceCard";
 import RequestBadge from "../components/RequestBadge";
 import useToggle from "../hooks/useToggle";
 import usePrevious from "../hooks/usePrevious";
 
-import type { Engineer, ProjectWorkspace } from "../types/index";
-import { mockEngineers, mockWorkspaces, mockRequest } from "../data/mockData";
+import type { Engineer, ApiWorkspace, ApiRequest } from "../types/index";
+import { mockEngineers } from "../data/mockData";
+import useUiStore from "../store/uiStore";
+import { fetchWorkspaces, fetchRequests } from "../api/client";
 
 function DashboardPage() {
   const [selectedEngineer, setSelectedEngineer] = useState<Engineer | null>(null);
-  const [workspaces, setWorkspaces] = useState<ProjectWorkspace[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [isError, setIsError] = useState<boolean>(false);
-  const [searchTerm, setSearchTerm] = useState<string>("");
+  
+  const { data: workspaces = [], isPending, isError, error } = useQuery<ApiWorkspace[]>({
+    queryKey: ["workspaces"],
+    queryFn: fetchWorkspaces,
+  });
+
+  const { data: requests = [] } = useQuery<ApiRequest[]>({
+    queryKey: ["requests"],
+    queryFn: fetchRequests,
+  });
+  
+  const latestRequest = requests.length > 0 ? requests[0] : null;
+
+  const searchTerm = useUiStore((state) => state.searchTerm);
+  const setSearchTerm = useUiStore((state) => state.setSearchTerm);
   
   const [showRequest, toggleRequest] = useToggle(false);
   const previousSearch = usePrevious(searchTerm);
-
-  const searchInputRef = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    setTimeout(() => {
-      setWorkspaces(mockWorkspaces);
-      setIsLoading(false);
-      searchInputRef.current?.focus();
-    }, 800);
-  }, []);
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
     setSearchTerm(e.target.value);
   };
 
-  const filteredWorkspaces = workspaces.filter((w) =>
-    w.title.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  if (isLoading) {
+  if (isPending) {
     return (
       <div className="animate-pulse p-6 text-gray-500 font-sans">
         Booting CloudOps Portal...
@@ -47,10 +47,14 @@ function DashboardPage() {
   if (isError) {
     return (
       <div className="m-6 rounded-lg bg-red-50 p-4 text-red-700 font-sans">
-        Could not load workspaces. Please try again.
+        {error.message} -- is json-server running on port 3001?
       </div>
     );
   }
+
+  const filteredWorkspaces = workspaces.filter((w) =>
+    w.title.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
     <>
@@ -59,19 +63,13 @@ function DashboardPage() {
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Dashboard</h1>
           
           <div className="flex gap-2">
-            <button 
-              onClick={() => setIsError(true)} 
-              className="rounded bg-red-100 px-3 py-1.5 text-sm font-semibold text-red-700 transition hover:bg-red-200"
-            >
-              Simulate Error
-            </button>
+            {/* Simulate Error removed since useQuery handles real errors */}
           </div>
         </div>
 
         {/* --- Section: Search and Filter --- */}
         <div className="mb-6 rounded-lg bg-white p-4 shadow-sm dark:bg-gray-800 dark:border dark:border-gray-700">
           <input 
-            ref={searchInputRef}
             value={searchTerm}
             onChange={handleSearchChange}
             type="text"
@@ -122,8 +120,8 @@ function DashboardPage() {
           {showRequest ? "Hide" : "Show"} Active Provision Request
         </button>
         
-        {showRequest && (
-          <RequestBadge request={mockRequest}>
+        {showRequest && latestRequest && (
+          <RequestBadge request={latestRequest}>
             <p>⚠️ Awaiting Admin Approval</p>
           </RequestBadge>
         )}

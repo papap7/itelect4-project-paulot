@@ -57,3 +57,16 @@ export interface ApiResponse<T> {
 export type EngineerUpdate = Partial<Engineer>;
 
 export type WorkspacePreview = Pick<ProjectWorkspace, "id" | "title">;
+
+export type ApiWorkspace = Omit<ProjectWorkspace, "id" | "createdAt"> & {
+  id: string;
+  createdAt: string;
+};
+
+export type ApiRequest = Omit<ProvisionRequest, "id" | "requestedAt" | "status"> & {
+  id: string;
+  status: string;
+  requestedAt: string;
+};
+
+export type NewRequest = Omit<ApiRequest, "id">;

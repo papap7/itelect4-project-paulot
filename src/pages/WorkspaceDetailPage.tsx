@@ -1,17 +1,27 @@
 import { useParams, useNavigate } from "react-router";
+import { useQuery } from "@tanstack/react-query";
 import WorkspaceCard from "../components/WorkspaceCard";
-import { mockWorkspaces } from "../data/mockData";
+import type { ApiWorkspace } from "../types/index";
+import { fetchWorkspaceById } from "../api/client";
 
 function WorkspaceDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
 
-  const workspace = mockWorkspaces.find((w) => w.id === Number(id));
+  const { data, isPending, isError, error } = useQuery<ApiWorkspace>({
+    queryKey: ["workspaces", id],
+    queryFn: () => fetchWorkspaceById(id!),
+    enabled: id !== undefined,
+  });
 
-  if (workspace === undefined) {
+  if (isPending) {
+    return <div className="animate-pulse p-6">Loading workspace...</div>;
+  }
+
+  if (isError) {
     return (
       <div className="rounded-lg bg-red-50 p-4 text-red-700">
-        No workspace found with ID "{id}".
+        {error.message}
       </div>
     );
   }
@@ -19,10 +29,10 @@ function WorkspaceDetailPage() {
   return (
     <div>
       <h2 className="mb-4 text-2xl font-bold text-gray-900 dark:text-white">
-        {workspace.title}
+        {data.title}
       </h2>
       <div className="max-w-sm">
-        <WorkspaceCard workspace={workspace} variant="default" />
+        <WorkspaceCard workspace={data} variant="default" />
       </div>
       <button 
         onClick={() => navigate("/workspaces")}

@@ -1,0 +1,26 @@
+{
+  "workspaces": [
+    { 
+      "id": "101", 
+      "title": "A.D.A.M. Command Center", 
+      "description": "Accident Detection Backend Infrastructure", 
+      "createdAt": "2026-08-01T09:00:00.000Z" 
+    },
+    { 
+      "id": "102", 
+      "title": "Cisco Routing Matrix", 
+      "description": "Inter-VLAN setups and DHCPv4 routing pools", 
+      "createdAt": "2026-08-05T09:00:00.000Z" 
+    }
+  ],
+  "requests": [
+    { 
+      "id": "5001", 
+      "engineerId": 1, 
+      "workspaceId": 101, 
+      "resourceType": "Node.js Server", 
+      "status": "Pending Review", 
+      "requestedAt": "2026-08-10T09:00:00.000Z" 
+    }
+  ]
+}
