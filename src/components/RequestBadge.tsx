@@ -1,7 +1,7 @@
-import type { ProvisionRequest } from "../types/index";
+import type { ApiRequest } from "../types/index";
 
 interface RequestBadgeProps {
-  request: ProvisionRequest;
+  request: ApiRequest;
   children?: React.ReactNode;
 }
 

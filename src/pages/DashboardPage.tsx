@@ -1,32 +1,35 @@
-import { useState, useEffect, useRef } from "react";
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import EngineerCard from "../components/EngineerCard";
 import WorkspaceCard from "../components/WorkspaceCard";
 import RequestBadge from "../components/RequestBadge";
 import useToggle from "../hooks/useToggle";
-import usePrevious from "../hooks/usePrevious";
 
-import type { Engineer, ProjectWorkspace } from "../types/index";
-import { mockEngineers, mockWorkspaces, mockRequest } from "../data/mockData";
+import type { Engineer, ApiWorkspace, ApiRequest } from "../types/index";
+import { mockEngineers } from "../data/mockData";
+import useUiStore from "../store/uiStore";
+import { fetchWorkspaces, fetchRequests } from "../api/client";
 
 function DashboardPage() {
   const [selectedEngineer, setSelectedEngineer] = useState<Engineer | null>(null);
-  const [workspaces, setWorkspaces] = useState<ProjectWorkspace[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [isError, setIsError] = useState<boolean>(false);
-  const [searchTerm, setSearchTerm] = useState<string>("");
+  
+  const { data: workspaces = [], isPending: workspacesPending, isError: workspacesError } = useQuery<ApiWorkspace[]>({
+    queryKey: ["workspaces"],
+    queryFn: fetchWorkspaces,
+  });
+
+  const { data: requests = [], isPending: requestsPending } = useQuery<ApiRequest[]>({
+    queryKey: ["requests"],
+    queryFn: fetchRequests,
+  });
+  
+  const latestRequest = requests.length > 0 ? requests[0] : null;
+  const pendingRequestsCount = requests.filter(r => r.status === "Pending Review").length;
+
+  const searchTerm = useUiStore((state) => state.searchTerm);
+  const setSearchTerm = useUiStore((state) => state.setSearchTerm);
   
   const [showRequest, toggleRequest] = useToggle(false);
-  const previousSearch = usePrevious(searchTerm);
-
-  const searchInputRef = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    setTimeout(() => {
-      setWorkspaces(mockWorkspaces);
-      setIsLoading(false);
-      searchInputRef.current?.focus();
-    }, 800);
-  }, []);
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
     setSearchTerm(e.target.value);
@@ -36,98 +39,126 @@ function DashboardPage() {
     w.title.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  if (isLoading) {
-    return (
-      <div className="animate-pulse p-6 text-gray-500 font-sans">
-        Booting CloudOps Portal...
-      </div>
-    );
-  }
-
-  if (isError) {
-    return (
-      <div className="m-6 rounded-lg bg-red-50 p-4 text-red-700 font-sans">
-        Could not load workspaces. Please try again.
-      </div>
-    );
-  }
-
   return (
-    <>
-        {/* --- Header & Controls --- */}
-        <div className="mb-6 flex flex-wrap gap-4 items-center justify-between">
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Dashboard</h1>
-          
-          <div className="flex gap-2">
-            <button 
-              onClick={() => setIsError(true)} 
-              className="rounded bg-red-100 px-3 py-1.5 text-sm font-semibold text-red-700 transition hover:bg-red-200"
-            >
-              Simulate Error
-            </button>
-          </div>
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Dashboard Overview</h1>
+          <p className="text-sm text-gray-500 dark:text-gray-400">Manage your infrastructure and team</p>
         </div>
+      </div>
 
-        {/* --- Section: Search and Filter --- */}
-        <div className="mb-6 rounded-lg bg-white p-4 shadow-sm dark:bg-gray-800 dark:border dark:border-gray-700">
-          <input 
-            ref={searchInputRef}
-            value={searchTerm}
-            onChange={handleSearchChange}
-            type="text"
-            placeholder="Search workspaces..."
-            className="w-full rounded border border-gray-300 p-2 text-gray-900 focus:border-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-          />
-          {previousSearch !== undefined && previousSearch !== searchTerm && (
-            <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">Previous search: "{previousSearch}"</p>
-          )}
+      {/* Metrics Row */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-gray-900">
+          <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Total Workspaces</h3>
+          <p className="mt-2 text-3xl font-bold text-gray-900 dark:text-white">{workspacesPending ? "-" : workspaces.length}</p>
         </div>
-
-        {/* --- Section: Engineer Selection (Responsive Grid) --- */}
-        <div className="mb-4">
-          <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-100 mb-3">Engineers</h2>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {mockEngineers.map(eng => (
-              <EngineerCard key={eng.id} engineer={eng} onSelect={setSelectedEngineer} />
-            ))}
-          </div>
-          {selectedEngineer && (
-            <p className="mt-4 font-medium text-green-600 dark:text-green-400">
-              Selected Engineer: {selectedEngineer.name}
-            </p>
-          )}
+        <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-gray-900">
+          <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Active Engineers</h3>
+          <p className="mt-2 text-3xl font-bold text-gray-900 dark:text-white">{mockEngineers.length}</p>
         </div>
+        <div className="rounded-xl border border-blue-200 bg-blue-50 p-6 shadow-sm dark:border-blue-900/50 dark:bg-blue-900/20">
+          <h3 className="text-sm font-medium text-blue-600 dark:text-blue-400">Pending Requests</h3>
+          <p className="mt-2 text-3xl font-bold text-blue-700 dark:text-blue-300">{requestsPending ? "-" : pendingRequestsCount}</p>
+        </div>
+      </div>
 
-        <hr className="my-6 border-gray-200 dark:border-gray-700" />
-
-        {/* --- Section: Dynamic Workspace List (Responsive Grid + Variant) --- */}
-        <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-100 mb-3">Active Workspaces</h2>
-        {filteredWorkspaces.length === 0 ? (
-          <p className="text-gray-600 dark:text-gray-400">No workspaces found.</p>
-        ) : (
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {filteredWorkspaces.map(ws => (
-              <WorkspaceCard key={ws.id} workspace={ws} variant="compact" />
-            ))}
-          </div>
-        )}
-
-        <hr className="my-6 border-gray-200 dark:border-gray-700" />
-
-        {/* --- Section: Toggleable Request Badge --- */}
-        <button 
-          onClick={toggleRequest} 
-          className="rounded bg-blue-100 px-4 py-2 text-sm font-semibold text-blue-700 transition hover:bg-blue-200 dark:bg-blue-900/30 dark:text-blue-300"
-        >
-          {showRequest ? "Hide" : "Show"} Active Provision Request
-        </button>
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
         
-        {showRequest && (
-          <RequestBadge request={mockRequest}>
-            <p>⚠️ Awaiting Admin Approval</p>
-          </RequestBadge>
-        )}
-    </>
+        {/* Left Column: Workspaces */}
+        <div className="xl:col-span-2 space-y-6">
+          <div className="rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-800 dark:bg-gray-900 overflow-hidden">
+            <div className="border-b border-gray-200 bg-gray-50 px-6 py-4 dark:border-gray-800 dark:bg-gray-800/50 flex justify-between items-center">
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Active Workspaces</h2>
+              <input 
+                value={searchTerm}
+                onChange={handleSearchChange}
+                type="text"
+                placeholder="Filter workspaces..."
+                className="w-48 rounded-lg border border-gray-300 px-3 py-1.5 text-sm focus:border-blue-500 focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+              />
+            </div>
+            
+            <div className="p-6">
+              {workspacesPending ? (
+                <div className="animate-pulse flex space-x-4">
+                  <div className="flex-1 space-y-4 py-1">
+                    <div className="h-2 bg-gray-200 rounded"></div>
+                    <div className="space-y-3">
+                      <div className="grid grid-cols-3 gap-4">
+                        <div className="h-2 bg-gray-200 rounded col-span-2"></div>
+                        <div className="h-2 bg-gray-200 rounded col-span-1"></div>
+                      </div>
+                      <div className="h-2 bg-gray-200 rounded"></div>
+                    </div>
+                  </div>
+                </div>
+              ) : workspacesError ? (
+                <p className="text-red-500">Failed to load workspaces.</p>
+              ) : filteredWorkspaces.length === 0 ? (
+                <p className="text-gray-500 dark:text-gray-400 text-center py-4">No workspaces found.</p>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {filteredWorkspaces.map(ws => (
+                    <WorkspaceCard key={ws.id} workspace={ws} variant="compact" />
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Right Column: Engineers & Requests */}
+        <div className="space-y-6">
+          
+          <div className="rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-800 dark:bg-gray-900 overflow-hidden">
+            <div className="border-b border-gray-200 bg-gray-50 px-6 py-4 dark:border-gray-800 dark:bg-gray-800/50">
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Engineering Team</h2>
+            </div>
+            <div className="p-6 space-y-4">
+              {mockEngineers.map(eng => (
+                <EngineerCard key={eng.id} engineer={eng} onSelect={setSelectedEngineer} />
+              ))}
+              
+              {selectedEngineer && (
+                <div className="mt-4 rounded-lg bg-green-50 p-3 border border-green-200 dark:bg-green-900/20 dark:border-green-800/30">
+                  <p className="text-sm font-medium text-green-800 dark:text-green-400">
+                    Selected: {selectedEngineer.name}
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-800 dark:bg-gray-900 overflow-hidden">
+            <div className="border-b border-gray-200 bg-gray-50 px-6 py-4 dark:border-gray-800 dark:bg-gray-800/50 flex justify-between items-center">
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Recent Request</h2>
+              <button 
+                onClick={toggleRequest} 
+                className="text-xs font-medium text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+              >
+                {showRequest ? "Hide" : "Show"}
+              </button>
+            </div>
+            
+            {showRequest && (
+              <div className="p-6">
+                {latestRequest ? (
+                  <RequestBadge request={latestRequest}>
+                    <p className="text-xs mt-1 text-gray-500">Requested: {new Date(latestRequest.requestedAt).toLocaleDateString()}</p>
+                  </RequestBadge>
+                ) : (
+                  <p className="text-sm text-gray-500 dark:text-gray-400">No recent requests.</p>
+                )}
+              </div>
+            )}
+          </div>
+
+        </div>
+      </div>
+    </div>
   );
 }
 
