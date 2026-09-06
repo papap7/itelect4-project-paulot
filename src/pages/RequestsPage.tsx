@@ -1,16 +1,22 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import RequestBadge from "../components/RequestBadge";
-import type { ApiRequest } from "../types/index";
-import { fetchRequests, createRequest } from "../api/client";
+import type { ApiRequest, ApiWorkspace } from "../types/index";
+import { fetchRequests, createRequest, fetchWorkspaces } from "../api/client";
 
 function RequestsPage() {
   const [resourceType, setResourceType] = useState<string>("");
+  const [selectedWorkspaceId, setSelectedWorkspaceId] = useState<number>(101);
   const queryClient = useQueryClient();
 
   const { data: requests = [], isPending, isError } = useQuery<ApiRequest[]>({
     queryKey: ["requests"],
     queryFn: fetchRequests,
+  });
+
+  const { data: workspaces = [] } = useQuery<ApiWorkspace[]>({
+    queryKey: ["workspaces"],
+    queryFn: fetchWorkspaces,
   });
 
   const addRequest = useMutation({
@@ -24,7 +30,7 @@ function RequestsPage() {
   const handleAdd = (): void => {
     addRequest.mutate({
       engineerId: 1,
-      workspaceId: 101,
+      workspaceId: selectedWorkspaceId,
       resourceType: resourceType,
       status: "Pending Review",
       requestedAt: new Date().toISOString(),
@@ -84,11 +90,17 @@ function RequestsPage() {
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                   Target Workspace
                 </label>
-                <select className="w-full rounded-lg border border-gray-300 p-2.5 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-white bg-white dark:bg-gray-800 text-gray-500">
-                  <option>101 - A.D.A.M. Command Center</option>
-                  <option>102 - Cisco Routing Matrix</option>
+                <select 
+                  value={selectedWorkspaceId}
+                  onChange={(e) => setSelectedWorkspaceId(Number(e.target.value))}
+                  className="w-full rounded-lg border border-gray-300 p-2.5 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+                >
+                  {workspaces.map((ws) => (
+                    <option key={ws.id} value={ws.id}>
+                      {ws.id} - {ws.title}
+                    </option>
+                  ))}
                 </select>
-                <p className="mt-1 text-xs text-gray-500">(Hardcoded for demo)</p>
               </div>
 
               {addRequest.isError && (

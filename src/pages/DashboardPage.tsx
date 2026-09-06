@@ -23,7 +23,7 @@ function DashboardPage() {
     queryFn: fetchRequests,
   });
   
-  const latestRequest = requests.length > 0 ? requests[0] : null;
+  const latestRequest = requests.length > 0 ? requests[requests.length - 1] : null;
   const pendingRequestsCount = requests.filter(r => r.status === "Pending Review").length;
 
   const searchTerm = useUiStore((state) => state.searchTerm);
