@@ -1,31 +1,52 @@
-import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { requestSchema } from "../schemas/requestSchema";
+import type { RequestFormValues } from "../schemas/requestSchema";
 import RequestBadge from "../components/RequestBadge";
-import type { ApiRequest } from "../types/index";
-import { fetchRequests, createRequest } from "../api/client";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import type { ApiRequest, ApiWorkspace } from "../types/index";
+import { fetchRequests, createRequest, fetchWorkspaces } from "../api/client";
 
 function RequestsPage() {
-  const [resourceType, setResourceType] = useState<string>("");
   const queryClient = useQueryClient();
+
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<RequestFormValues>({
+    resolver: zodResolver(requestSchema),
+    mode: "onBlur",
+    defaultValues: { resourceType: "", workspaceId: 101 },
+  });
 
   const { data: requests = [], isPending, isError } = useQuery<ApiRequest[]>({
     queryKey: ["requests"],
     queryFn: fetchRequests,
   });
 
+  const { data: workspaces = [] } = useQuery<ApiWorkspace[]>({
+    queryKey: ["workspaces"],
+    queryFn: fetchWorkspaces,
+  });
+
   const addRequest = useMutation({
     mutationFn: createRequest,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["requests"] });
-      setResourceType("");
+      reset();
     },
   });
 
-  const handleAdd = (): void => {
+  const onSubmit = (values: RequestFormValues): void => {
     addRequest.mutate({
       engineerId: 1,
-      workspaceId: 101,
-      resourceType: resourceType,
+      workspaceId: values.workspaceId,
+      resourceType: values.resourceType,
       status: "Pending Review",
       requestedAt: new Date().toISOString(),
     });
@@ -64,31 +85,43 @@ function RequestsPage() {
         
         {/* Left Column: Form */}
         <div className="lg:col-span-1">
-          <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-gray-900 sticky top-6">
+          <form onSubmit={handleSubmit(onSubmit)} className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-gray-900 sticky top-6">
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">New Request</h3>
             
             <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              <div className="grid gap-1.5">
+                <Label htmlFor="resourceType" className="text-foreground">
                   Resource Type
-                </label>
-                <input 
-                  value={resourceType}
-                  onChange={(e) => setResourceType(e.target.value)}
+                </Label>
+                <Input 
+                  id="resourceType"
+                  {...register("resourceType")}
+                  aria-invalid={errors.resourceType ? true : undefined}
                   placeholder="e.g. AWS RDS PostgreSQL"
-                  className="w-full rounded-lg border border-gray-300 p-2.5 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-white" 
                 />
+                {errors.resourceType && (
+                  <p className="text-sm text-red-600">{errors.resourceType.message}</p>
+                )}
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              <div className="grid gap-1.5">
+                <Label htmlFor="workspaceId" className="text-foreground">
                   Target Workspace
-                </label>
-                <select className="w-full rounded-lg border border-gray-300 p-2.5 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-white bg-white dark:bg-gray-800 text-gray-500">
-                  <option>101 - A.D.A.M. Command Center</option>
-                  <option>102 - Cisco Routing Matrix</option>
+                </Label>
+                <select 
+                  id="workspaceId"
+                  {...register("workspaceId", { valueAsNumber: true })}
+                  className="w-full rounded-lg border border-gray-300 p-2.5 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+                >
+                  {workspaces.map((ws) => (
+                    <option key={ws.id} value={ws.id}>
+                      {ws.id} - {ws.title}
+                    </option>
+                  ))}
                 </select>
-                <p className="mt-1 text-xs text-gray-500">(Hardcoded for demo)</p>
+                {errors.workspaceId && (
+                  <p className="text-sm text-red-600">{errors.workspaceId.message}</p>
+                )}
               </div>
 
               {addRequest.isError && (
@@ -97,15 +130,15 @@ function RequestsPage() {
                 </div>
               )}
 
-              <button 
-                onClick={handleAdd}
-                disabled={resourceType === "" || addRequest.isPending}
-                className="w-full mt-4 rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-blue-700 disabled:bg-blue-400 disabled:cursor-not-allowed dark:disabled:bg-blue-900 dark:disabled:text-blue-300"
+              <Button 
+                type="submit"
+                disabled={addRequest.isPending}
+                className="w-full mt-4 justify-center"
               >
                 {addRequest.isPending ? "Submitting..." : "Submit Provision Request"}
-              </button>
+              </Button>
             </div>
-          </div>
+          </form>
         </div>
 
         {/* Right Column: Feed */}

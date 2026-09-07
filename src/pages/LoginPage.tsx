@@ -1,11 +1,16 @@
+import { useState } from "react";
 import useAuthStore from "../store/authStore";
 import { useNavigate } from "react-router";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 function LoginPage() {
+  const [name, setName] = useState<string>("");
   const login = useAuthStore((state) => state.login);
   const navigate = useNavigate();
 
-  const handleLogin = (name: string) => {
+  const handleLogin = () => {
     login(name);
     navigate("/");
   };
@@ -19,28 +24,23 @@ function LoginPage() {
         </div>
 
         <div className="space-y-4">
-          <button 
-            onClick={() => handleLogin("Paulo")}
-            className="flex w-full items-center justify-center rounded-lg bg-blue-600 px-4 py-3 font-semibold text-white transition-colors hover:bg-blue-700"
-          >
-            Login as Paulo
-          </button>
-          
-          <div className="relative my-6">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-gray-200 dark:border-gray-700"></div>
-            </div>
-            <div className="relative flex justify-center text-sm">
-              <span className="bg-white px-2 text-gray-500 dark:bg-gray-900 dark:text-gray-400">or continue as</span>
-            </div>
+          <div className="grid gap-1.5">
+            <Label htmlFor="name" className="text-foreground">Your name</Label>
+            <Input 
+              id="name" 
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Juan dela Cruz" 
+            />
           </div>
-
-          <button 
-            onClick={() => handleLogin("Admin")}
-            className="flex w-full items-center justify-center rounded-lg border border-gray-300 bg-white px-4 py-3 font-semibold text-gray-900 shadow-sm transition-colors hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:hover:bg-gray-700"
+          
+          <Button 
+            onClick={handleLogin} 
+            disabled={name === ""} 
+            className="w-full mt-3 justify-center"
           >
-            Login as Admin
-          </button>
+            Log In
+          </Button>
         </div>
       </div>
     </div>

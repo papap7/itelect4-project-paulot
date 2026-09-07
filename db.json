@@ -3,14 +3,38 @@
     {
       "id": "101",
       "title": "A.D.A.M. Command Center",
-      "description": "Accident Detection Backend Infrastructure",
+      "description": "Accident Detection & Autonomous Monitoring real-time telemetry backend infrastructure.",
       "createdAt": "2026-08-01T09:00:00.000Z"
     },
     {
       "id": "102",
-      "title": "Cisco Routing Matrix",
-      "description": "Inter-VLAN setups and DHCPv4 routing pools",
-      "createdAt": "2026-08-05T09:00:00.000Z"
+      "title": "Cisco Core Routing Matrix",
+      "description": "Multi-VLAN core routing architecture, BGP peering, and redundant DHCPv4 server pools.",
+      "createdAt": "2026-08-05T14:30:00.000Z"
+    },
+    {
+      "id": "103",
+      "title": "CloudOps Kubernetes Fleet",
+      "description": "Production multi-region AWS EKS cluster hosting containerized microservices and service mesh.",
+      "createdAt": "2026-08-12T11:15:00.000Z"
+    },
+    {
+      "id": "104",
+      "title": "Apex Data Lakehouse",
+      "description": "Distributed data analytics pipeline powered by Apache Kafka, Spark streaming, and S3 vaults.",
+      "createdAt": "2026-08-18T08:00:00.000Z"
+    },
+    {
+      "id": "105",
+      "title": "Zero-Trust Security Perimeter",
+      "description": "Cloudflare Tunnel ingress gateways, automated IAM role policies, and WireGuard VPN tunnels.",
+      "createdAt": "2026-08-25T16:45:00.000Z"
+    },
+    {
+      "id": "106",
+      "title": "Edge AI Inference Cluster",
+      "description": "Ultra-low latency GPU cluster hosting vision models, Triton inference pods, and vLLM workers.",
+      "createdAt": "2026-09-01T10:20:00.000Z"
     }
   ],
   "requests": [
@@ -18,25 +42,81 @@
       "id": "5001",
       "engineerId": 1,
       "workspaceId": 101,
-      "resourceType": "Node.js Server",
-      "status": "Pending Review",
-      "requestedAt": "2026-08-10T09:00:00.000Z"
+      "resourceType": "Node.js Realtime Socket Server",
+      "status": "Active",
+      "requestedAt": "2026-08-02T10:00:00.000Z"
     },
     {
-      "engineerId": 1,
-      "workspaceId": 101,
-      "resourceType": "AWS Ec2 Instance",
-      "status": "Pending Review",
-      "requestedAt": "2026-08-22T11:35:28.217Z",
-      "id": "mb4CFD19SaE"
+      "id": "5002",
+      "engineerId": 3,
+      "workspaceId": 102,
+      "resourceType": "Cisco Catalyst 9300 Core Switch Pool",
+      "status": "Active",
+      "requestedAt": "2026-08-06T11:20:00.000Z"
     },
     {
+      "id": "5003",
+      "engineerId": 2,
+      "workspaceId": 103,
+      "resourceType": "AWS EKS Managed Node Group (m6i.2xlarge)",
+      "status": "Active",
+      "requestedAt": "2026-08-14T09:15:00.000Z"
+    },
+    {
+      "id": "5004",
+      "engineerId": 6,
+      "workspaceId": 104,
+      "resourceType": "Snowflake Snowpipe Auto-Ingest",
+      "status": "Terminated",
+      "requestedAt": "2026-08-20T13:40:00.000Z"
+    },
+    {
+      "id": "5005",
+      "engineerId": 2,
+      "workspaceId": 106,
+      "resourceType": "Triton Model Inference Pod (DirectML)",
+      "status": "Failed",
+      "requestedAt": "2026-08-24T18:10:00.000Z"
+    },
+    {
+      "id": "5006",
+      "engineerId": 1,
+      "workspaceId": 104,
+      "resourceType": "Apache Kafka 3-Node Event Stream",
+      "status": "Provisioning",
+      "requestedAt": "2026-08-29T08:30:00.000Z"
+    },
+    {
+      "id": "5007",
+      "engineerId": 4,
+      "workspaceId": 106,
+      "resourceType": "NVIDIA A100 Tensor Core 80GB GPU",
+      "status": "Pending Review",
+      "requestedAt": "2026-09-02T11:15:20.000Z"
+    },
+    {
+      "id": "5008",
       "engineerId": 1,
       "workspaceId": 101,
-      "resourceType": "AWS Lambda",
+      "resourceType": "AWS RDS Multi-AZ PostgreSQL 16",
       "status": "Pending Review",
-      "requestedAt": "2026-08-22T12:04:54.364Z",
-      "id": "4-iUEJFaGgA"
+      "requestedAt": "2026-09-04T15:22:45.000Z"
+    },
+    {
+      "id": "5009",
+      "engineerId": 5,
+      "workspaceId": 103,
+      "resourceType": "Redis Cluster 7.2 Sentinel In-Memory Cache",
+      "status": "Pending Review",
+      "requestedAt": "2026-09-05T14:05:10.000Z"
+    },
+    {
+      "id": "5010",
+      "engineerId": 3,
+      "workspaceId": 105,
+      "resourceType": "Cloudflare Zero-Trust Ingress Gateway",
+      "status": "Pending Review",
+      "requestedAt": "2026-09-06T09:30:00.000Z"
     }
   ],
   "$schema": "./node_modules/json-server/schema.json"
