@@ -24,7 +24,9 @@ function DashboardPage() {
   });
   
   const latestRequest = requests.length > 0 ? requests[requests.length - 1] : null;
-  const pendingRequestsCount = requests.filter(r => r.status === "Pending Review").length;
+  const pendingRequestsCount = requests.filter(
+    (r) => r.status === "Pending Review" || (r.status as unknown) === 0 || r.status === "0"
+  ).length;
 
   const searchTerm = useUiStore((state) => state.searchTerm);
   const setSearchTerm = useUiStore((state) => state.setSearchTerm);

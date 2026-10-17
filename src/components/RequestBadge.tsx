@@ -5,7 +5,22 @@ interface RequestBadgeProps {
   children?: React.ReactNode;
 }
 
+const STATUS_MAP: Record<string | number, string> = {
+  0: "Pending Review",
+  1: "Provisioning",
+  2: "Active",
+  3: "Failed",
+  4: "Terminated",
+  "Pending Review": "Pending Review",
+  "Provisioning": "Provisioning",
+  "Active": "Active",
+  "Failed": "Failed",
+  "Terminated": "Terminated",
+};
+
 const RequestBadge: React.FC<RequestBadgeProps> = ({ request, children }) => {
+  const displayStatus = STATUS_MAP[request.status] ?? String(request.status);
+
   const getStatusStyle = (status: string) => {
     switch (status) {
       case "Active":
@@ -34,8 +49,8 @@ const RequestBadge: React.FC<RequestBadgeProps> = ({ request, children }) => {
             {request.resourceType}
           </h4>
         </div>
-        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${getStatusStyle(request.status)}`}>
-          {request.status}
+        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${getStatusStyle(displayStatus)}`}>
+          {displayStatus}
         </span>
       </div>
       <div>{children}</div>
