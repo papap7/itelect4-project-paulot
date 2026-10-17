@@ -1,39 +1,73 @@
-import type { ApiWorkspace, ApiRequest, NewRequest } from "../types/index";
+import type { ApiWorkspace, ApiRequest, NewRequest, ApiEngineer, AuthReply } from "../types/index";
+import useAuthStore from "../store/authStore";
 
-export const API_URL = "http://localhost:3001";
+export const API_URL = import.meta.env.VITE_API_URL;
 
-export async function fetchWorkspaces(): Promise<ApiWorkspace[]> {
-  const res = await fetch(`${API_URL}/workspaces`);
+if (!API_URL) {
+  throw new Error(
+    "VITE_API_URL is missing. Copy .env.example to .env, fill it in, and restart npm run dev."
+  );
+}
+
+async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
+  const token = useAuthStore.getState().token;
+
+  const res = await fetch(`${API_URL}${path}`, {
+    ...init,
+    headers: {
+      "Content-Type": "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      ...init.headers,
+    },
+  });
+
   if (!res.ok) {
-    throw new Error("Could not load workspaces");
+    const body = await res.json().catch(() => null);
+    throw new Error(body?.message ?? `Request failed (${res.status})`);
   }
+
   return res.json();
 }
 
-export async function fetchWorkspaceById(id: string): Promise<ApiWorkspace> {
-  const res = await fetch(`${API_URL}/workspaces/${id}`);
-  if (!res.ok) {
-    throw new Error(`Could not load workspace with id "${id}"`);
-  }
-  return res.json();
+// Public Workspace calls
+export function fetchWorkspaces(): Promise<ApiWorkspace[]> {
+  return request<ApiWorkspace[]>("/api/workspaces");
 }
 
-export async function fetchRequests(): Promise<ApiRequest[]> {
-  const res = await fetch(`${API_URL}/requests`);
-  if (!res.ok) {
-    throw new Error("Could not load requests");
-  }
-  return res.json();
+export function fetchWorkspaceById(id: string): Promise<ApiWorkspace> {
+  return request<ApiWorkspace>(`/api/workspaces/${id}`);
 }
 
-export async function createRequest(newRequest: NewRequest): Promise<ApiRequest> {
-  const res = await fetch(`${API_URL}/requests`, {
+// Protected Requests calls (token attached automatically)
+export function fetchRequests(): Promise<ApiRequest[]> {
+  return request<ApiRequest[]>("/api/provision-requests");
+}
+
+export function createRequest(newRequest: NewRequest): Promise<ApiRequest> {
+  return request<ApiRequest>("/api/provision-requests", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
     body: JSON.stringify(newRequest),
   });
-  if (!res.ok) {
-    throw new Error("Could not save the request");
-  }
-  return res.json();
+}
+
+// Auth calls
+export function registerUser(body: {
+  name: string;
+  email: string;
+  password: string;
+}): Promise<ApiEngineer> {
+  return request<ApiEngineer>("/api/auth/register", {
+    method: "POST",
+    body: JSON.stringify(body),
+  });
+}
+
+export function loginUser(body: {
+  email: string;
+  password: string;
+}): Promise<AuthReply> {
+  return request<AuthReply>("/api/auth/login", {
+    method: "POST",
+    body: JSON.stringify(body),
+  });
 }

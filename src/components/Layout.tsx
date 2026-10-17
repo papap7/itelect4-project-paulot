@@ -18,7 +18,7 @@ function Layout() {
   return (
     <div className={isDarkMode ? "dark" : ""}>
       <div className="flex h-screen bg-gray-50 dark:bg-gray-900 font-sans transition-colors duration-200 text-gray-900 dark:text-gray-100">
-        
+
         {/* Sidebar */}
         <aside className="w-64 flex flex-col border-r border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900 shadow-sm hidden md:flex">
           <div className="flex items-center justify-center h-20 border-b border-gray-200 dark:border-gray-800">
@@ -44,7 +44,7 @@ function Layout() {
             <div className="flex items-center md:hidden">
               <span className="text-xl font-bold tracking-wider text-blue-600 dark:text-blue-400 uppercase">CloudOps</span>
             </div>
-            
+
             <div className="ml-auto flex items-center space-x-6">
               <button
                 onClick={toggleDarkMode}
@@ -57,9 +57,14 @@ function Layout() {
               <div className="h-8 w-px bg-gray-300 dark:bg-gray-700"></div>
 
               {userName === null ? (
-                <NavLink to="/login" className="rounded-lg bg-blue-600 px-5 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 transition-colors">
-                  Login
-                </NavLink>
+                <div className="flex items-center space-x-3">
+                  <NavLink to="/login" className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 transition-colors">
+                    Login
+                  </NavLink>
+                  <NavLink to="/register" className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-100 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800 transition-colors">
+                    Register
+                  </NavLink>
+                </div>
               ) : (
                 <div className="flex items-center space-x-4">
                   <div className="flex items-center space-x-2">
@@ -68,8 +73,8 @@ function Layout() {
                     </div>
                     <span className="text-sm font-medium">{userName}</span>
                   </div>
-                  <button 
-                    onClick={logout} 
+                  <button
+                    onClick={logout}
                     className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700 transition-colors"
                   >
                     Logout
