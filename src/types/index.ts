@@ -69,4 +69,17 @@ export type ApiRequest = Omit<ProvisionRequest, "id" | "requestedAt" | "status">
   requestedAt: string;
 };
 
-export type NewRequest = Omit<ApiRequest, "id">;
+// What /api/auth/register sends back and what sits inside the login reply
+export type ApiEngineer = Omit<Engineer, "id"> & {
+  id: string;
+};
+
+// What /api/auth/login sends back
+export interface AuthReply {
+  token: string;
+  user: ApiEngineer;
+}
+
+// What we send when creating a request:
+// (The backend fills engineerId from the JWT token and requestedAt from schema default)
+export type NewRequest = Pick<ProvisionRequest, "workspaceId" | "resourceType">;

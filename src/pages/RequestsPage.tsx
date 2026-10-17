@@ -42,15 +42,13 @@ function RequestsPage() {
     },
   });
 
-  const onSubmit = (values: RequestFormValues): void => {
+    const onSubmit = (values: RequestFormValues): void => {
     addRequest.mutate({
-      engineerId: 1,
       workspaceId: values.workspaceId,
       resourceType: values.resourceType,
-      status: "Pending Review",
-      requestedAt: new Date().toISOString(),
     });
   };
+
 
   if (isPending) {
     return (

@@ -4,9 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "concurrently -n \"api,vite\" -c \"blue,magenta\" \"npm run api\" \"npm run dev:client\"",
-    "dev:client": "vite",
-    "api": "json-server db.json --port 3001",
+    "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview"

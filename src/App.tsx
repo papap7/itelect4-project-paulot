@@ -6,6 +6,7 @@ import WorkspacesPage from "./pages/WorkspacesPage";
 import WorkspaceDetailPage from "./pages/WorkspaceDetailPage";
 import RequestsPage from "./pages/RequestsPage";
 import LoginPage from "./pages/LoginPage";
+import RegisterPage from "./pages/RegisterPage";
 import NotFoundPage from "./pages/NotFoundPage";
 
 function App() {
@@ -16,7 +17,8 @@ function App() {
         <Route path="workspaces" element={<WorkspacesPage />} />
         <Route path="workspaces/:id" element={<WorkspaceDetailPage />} />
         <Route path="login" element={<LoginPage />} />
-        
+        <Route path="register" element={<RegisterPage />} />
+
         <Route element={<ProtectedRoute />}>
           <Route path="requests" element={<RequestsPage />} />
         </Route>
