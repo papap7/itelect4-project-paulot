@@ -83,3 +83,13 @@ export interface AuthReply {
 // What we send when creating a request:
 // (The backend fills engineerId from the JWT token and requestedAt from schema default)
 export type NewRequest = Pick<ProvisionRequest, "workspaceId" | "resourceType">;
+
+// ===== SESSION 11: what POST /api/ai sends back =======================
+// Derived from the backend schema in itelect4-backend/src/schemas/advisor.ts
+export interface AiAdvisor {
+  summary: string;
+  suggestions: string[];
+  risks: string[];
+  urgency: "critical" | "standard" | "low";
+}
+
