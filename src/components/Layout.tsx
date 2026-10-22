@@ -34,6 +34,10 @@ function Layout() {
             <NavLink to="/requests" className={linkClass}>
               <span className="mr-3 text-lg">📝</span> Requests
             </NavLink>
+            {/* Session 11: the one page that talks to Gemini */}
+            <NavLink to="/advisor" className={linkClass}>
+              <span className="mr-3 text-lg">🤖</span> AI Advisor
+            </NavLink>
           </nav>
         </aside>
 

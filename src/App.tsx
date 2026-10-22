@@ -5,6 +5,7 @@ import DashboardPage from "./pages/DashboardPage";
 import WorkspacesPage from "./pages/WorkspacesPage";
 import WorkspaceDetailPage from "./pages/WorkspaceDetailPage";
 import RequestsPage from "./pages/RequestsPage";
+import AdvisorPage from "./pages/AdvisorPage";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import NotFoundPage from "./pages/NotFoundPage";
@@ -21,6 +22,9 @@ function App() {
 
         <Route element={<ProtectedRoute />}>
           <Route path="requests" element={<RequestsPage />} />
+          {/* Session 11: behind the same guard -- the API refuses it
+              without a token anyway, so the page should not offer it. */}
+          <Route path="advisor" element={<AdvisorPage />} />
         </Route>
 
         <Route path="*" element={<NotFoundPage />} />

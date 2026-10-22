@@ -1,4 +1,4 @@
-import type { ApiWorkspace, ApiRequest, NewRequest, ApiEngineer, AuthReply } from "../types/index";
+import type { ApiWorkspace, ApiRequest, NewRequest, ApiEngineer, AuthReply, AiAdvisor } from "../types/index";
 import useAuthStore from "../store/authStore";
 
 export const API_URL = import.meta.env.VITE_API_URL;
@@ -69,5 +69,16 @@ export function loginUser(body: {
   return request<AuthReply>("/api/auth/login", {
     method: "POST",
     body: JSON.stringify(body),
+  });
+}
+
+// ===== SESSION 11: one more private call ===============================
+// ---- ai: private, like provision requests. The token goes on automatically,
+// which matters more here than anywhere: without it, anyone could
+// spend your Gemini quota.
+export function askAi(prompt: string): Promise<AiAdvisor> {
+  return request<AiAdvisor>("/api/ai", {
+    method: "POST",
+    body: JSON.stringify({ prompt }),
   });
 }
