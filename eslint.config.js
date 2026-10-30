@@ -20,11 +20,9 @@ export default defineConfig([
     },
   },
   {
-    // shadcn's generated files (button.tsx) export a component AND its
-    // variants helper from one file. That is how shadcn ships them, and the
-    // rule only affects Fast Refresh in dev, so it is switched off here
-    // rather than editing generated code. CI runs `npm run lint`, and
-    // without this it fails on a file nobody wrote by hand.
+    // shadcn-generated files export a component and its variants helper from
+    // the same module. The rule only affects Fast Refresh in development, so
+    // it is disabled here instead of editing generated code.
     files: ['src/components/ui/**/*.{ts,tsx}'],
     rules: {
       'react-refresh/only-export-components': 'off',
