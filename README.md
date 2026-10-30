@@ -93,10 +93,3 @@ Three Vitest tests, each beside the file it tests:
 - `src/pages/LoginPage.test.tsx` — the login form shows the schema's messages and sends no request while it is invalid.
 
 `.github/workflows/ci.yml` runs `npm run lint`, `npm test` and `npm run build` on every push. The badge at the top of this file shows the result of the latest run.
-
----
-
-## 🤖 AI Use Disclosure
-
-<!-- TODO (author): list the AI tools you used, what for, and what you wrote or changed yourself. -->
-_To be completed by the author._
