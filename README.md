@@ -32,7 +32,7 @@ flowchart LR
 
 - **Framework:** React 19 + TypeScript + Vite
 - **Styling:** Tailwind CSS + shadcn/ui components
-- **Routing:** React Router v7
+- **Routing:** React Router v8
 - **Server State & Caching:** TanStack React Query v5
 - **Client State:** Zustand with persistent storage
 - **Form Validation:** React Hook Form + Zod
